@@ -1,0 +1,28 @@
+CFLAGS = "-I /usr/local/lib/erlang/erts-5.7/include -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -fPIC -g -O2 -Wall"
+LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
+EXTLIBS = "/usr/local/lib/erlang/lib/erl_interface-3.6/lib/libei.a /usr/local/lib/liblua.a"
+
+FILES = ["commands", "lua_drv"]
+
+desc "Compile driver to a shared lib"
+task :compile => ["../priv/lua_drv.so"]
+
+FILES.each do |f|
+  file "#{f}.o" => ["#{f}.c"] do
+    # puts "gcc #{CFLAGS} -c -o #{f}.o #{f}.c"
+    sh "gcc #{CFLAGS} -c -o #{f}.o #{f}.c"
+  end
+end
+
+file "../priv/lua_drv.so" => FILES.map {|f| "#{f}.o"} do
+  sh "mkdir -p ../priv"
+  # puts "gcc #{CFLAGS} #{LDFLAGS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
+  print "Compiling lua_drv.so..."
+  sh "gcc #{CFLAGS} #{LDFLAGS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
+  print " done\n"
+  sh "rm #{FILES.join('.o ')}.o"
+end
+
+task :clean do
+  sh "rm ../priv/*.so"
+end
