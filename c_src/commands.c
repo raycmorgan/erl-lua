@@ -80,9 +80,9 @@ erl_lua_pushboolean(lua_drv_t *driver_data, char *buf, int index)
 void
 erl_lua_pushinteger(lua_drv_t *driver_data, char *buf, int index)
 {
-  long num;
+  long long num;
   
-  ei_decode_long(buf, &index, &num);
+  ei_decode_longlong(buf, &index, &num);
   
   lua_pushinteger(driver_data->L, num);
   
@@ -112,11 +112,22 @@ erl_lua_pushnil(lua_drv_t *driver_data, char *buf, int index)
 void
 erl_lua_pushnumber(lua_drv_t *driver_data, char *buf, int index)
 {
-  double num;
+  double dnum;
+  long long lnum;
+  int type, len;
   
-  ei_decode_double(buf, &index, &num);
+  ei_get_type(buf, &index, &type, &len);
   
-  lua_pushnumber(driver_data->L, num);
+  switch (type) {
+  case ERL_FLOAT_EXT:
+    ei_decode_double(buf, &index, &dnum);
+    lua_pushnumber(driver_data->L, dnum);
+    break;
+  default:
+    ei_decode_longlong(buf, &index, &lnum);
+    lua_pushnumber(driver_data->L, lnum);
+    break;
+  }
   
   reply_ok(driver_data);
 }
@@ -182,7 +193,8 @@ erl_lua_toboolean(lua_drv_t *driver_data, char *buf, int index)
 void
 erl_lua_tointeger(lua_drv_t *driver_data, char *buf, int index)
 {
-  long i, res;
+  long i;
+  long long res;
   
   ei_decode_long(buf, &index, &i);
   
@@ -215,22 +227,48 @@ erl_lua_tolstring(lua_drv_t *driver_data, char *buf, int index)
   driver_output_term(driver_data->port, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
+
+/* TODO: return a binary instead of a list that is then converted to a binary */
 void
 erl_lua_tonumber(lua_drv_t *driver_data, char *buf, int index)
 {
   long i;
   double res;
-  
+  int encode_i = 0;
+  int size;
+  char *eibuf;
+    
   ei_decode_long(buf, &index, &i);
   
   res = lua_tonumber(driver_data->L, i);
   
+  ei_encode_version(NULL, &encode_i);
+  if ((long long) res == res) {
+    ei_encode_longlong(NULL, &encode_i, (long long) res);
+    size = encode_i;
+    encode_i = 0;
+    eibuf = malloc(sizeof(char) * (size + 1));
+    
+    ei_encode_version(eibuf, &encode_i);
+    ei_encode_longlong(eibuf, &encode_i, res);
+  } else {
+    ei_encode_double(NULL, &encode_i, res);
+    size = encode_i;
+    encode_i = 0;
+    eibuf = malloc(sizeof(char) * (size + 1));
+
+    ei_encode_version(eibuf, &encode_i);
+    ei_encode_double(eibuf, &encode_i, res);
+  }
+    
   ErlDrvTermData spec[] = {
         ERL_DRV_ATOM,   ATOM_OK,
-        ERL_DRV_FLOAT, (ErlDrvTermData) res,
+        ERL_DRV_STRING, (ErlDrvTermData) eibuf, size,
         ERL_DRV_TUPLE,  2
   };
   driver_output_term(driver_data->port, spec, sizeof(spec) / sizeof(spec[0]));
+  free(eibuf);
+  //driver_free_binary(bin);
 }
 
 

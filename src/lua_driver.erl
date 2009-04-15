@@ -8,8 +8,8 @@ open() ->
   {ok, L} = load_driver(),
   #lua{port=L}.
   
-close(L) ->
-  port_close(L).
+close(#lua{port=Port}) ->
+  port_close(Port).
 
 
 %% Private functions

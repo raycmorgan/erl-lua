@@ -1,6 +1,7 @@
 -module(lua).
 
 -export([new_state/0,
+         close/1,
          call/3,
          concat/2,
          getfield/3,
@@ -23,6 +24,9 @@
 
 new_state() ->
     {ok, lua_driver:open()}.
+    
+close(L) ->
+    lua_driver:close(L).
 
 call(L, Args, Results) ->
     command(L, {?ERL_LUA_CALL, Args, Results}),
@@ -89,7 +93,9 @@ tolstring(L, Index) ->
 
 tonumber(L, Index) ->
     command(L, {?ERL_LUA_TONUMBER, Index}),
-    receive_valued_response().
+    {ok, Value} = receive_valued_response(),
+    Value2 = list_to_binary(Value),
+    {ok, binary_to_term(Value2)}.
 
 
 command(#lua{port=Port}, Data) ->
