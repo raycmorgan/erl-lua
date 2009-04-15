@@ -211,7 +211,7 @@ erl_lua_tointeger(lua_drv_t *driver_data, char *buf, int index)
 void
 erl_lua_tolstring(lua_drv_t *driver_data, char *buf, int index)
 {
-  unsigned long len;
+  size_t len;
   long i;
   const char *str;
   
