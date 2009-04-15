@@ -1,5 +1,9 @@
 CFLAGS = "-I /usr/local/lib/erlang/erts-5.7/include -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -fPIC -g -O2 -Wall"
-LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
+if ENV['platform'] == 'linux'
+  LDFLAGS = "-shared"
+else
+  LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
+end
 EXTLIBS = "/usr/local/lib/erlang/lib/erl_interface-3.6/lib/libei.a /usr/local/lib/liblua.a"
 
 FILES = ["commands", "lua_drv"]
