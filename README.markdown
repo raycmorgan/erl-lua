@@ -1,5 +1,7 @@
 Erl-Lua is a library for embedding Lua into Erlang. It provides a simple interface that is very similar to the Lua C API. In the future it will also include a higher level API to simplify things further.
 
+WARNING: This is definitely not fully tested. Still a bunch of work to be done. If you are careful though, it should be pretty stable (no promises though).
+
 Example:
 
     {ok, L} = lua:new_state().
