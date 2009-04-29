@@ -18,3 +18,9 @@ Example:
     S. % => "number" 
 
 For more examples, see the tests.
+
+There is also a simple way to run one way simple Lua code snippets:
+
+    (continued from above)
+    lual:dostring(L, "print 'Howdy!'").
+    % (Lua) => Howdy!
