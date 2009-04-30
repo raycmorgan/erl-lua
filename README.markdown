@@ -24,3 +24,20 @@ There is also a simple way to run one off simple Lua code snippets:
     (continued from above)
     lual:dostring(L, "print 'Howdy!'").
     % (Lua) => Howdy!
+    
+**NEW Higher Level API**
+
+*call* - Call a Lua function and return the values.
+
+    1> {ok, L} = lua:new_state().
+    2> lua_erl:call(L, type, [23], 1).
+    {"number"}
+    3> lual:dostring(L, "function add(a, b, c) return a + b + c end").
+    4> lua_erl:call(L, add, [2, 3, 4], 1).
+    {9}
+
+The strange 4th arg is the number of values the function can return (since in Lua you can return multiple things).
+If the number of returned values is 1, the argument can be left off.. therefore both of the above could be rewritten:
+
+    lua_erl:call(L, type, [23]).
+    lua_erl:call(L, add, [2, 3, 4]).
