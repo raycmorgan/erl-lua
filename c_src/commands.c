@@ -66,6 +66,21 @@ erl_lua_getglobal(lua_drv_t *driver_data, char *buf, int index)
 }
 
 void
+erl_lua_gettop(lua_drv_t *driver_data, char *buf, int index)
+{
+  int size;
+  
+  size = lua_gettop(driver_data->L);
+  
+  ErlDrvTermData spec[] = {
+        ERL_DRV_ATOM,   ATOM_OK,
+        ERL_DRV_INT, (ErlDrvTermData) size,
+        ERL_DRV_TUPLE,  2
+  };
+  driver_output_term(driver_data->port, spec, sizeof(spec) / sizeof(spec[0]));
+}
+
+void
 erl_lua_pushboolean(lua_drv_t *driver_data, char *buf, int index)
 {
   int b;
@@ -269,6 +284,24 @@ erl_lua_tonumber(lua_drv_t *driver_data, char *buf, int index)
   driver_output_term(driver_data->port, spec, sizeof(spec) / sizeof(spec[0]));
   free(eibuf);
   //driver_free_binary(bin);
+}
+
+void
+erl_lua_type(lua_drv_t *driver_data, char *buf, int index)
+{
+  long i;
+  int lua_t;
+  
+  ei_decode_long(buf, &index, &i);
+  
+  lua_t = lua_type(driver_data->L, i);
+  
+  ErlDrvTermData spec[] = {
+        ERL_DRV_ATOM,   ATOM_OK,
+        ERL_DRV_INT, (ErlDrvTermData) lua_t,
+        ERL_DRV_TUPLE,  2
+  };
+  driver_output_term(driver_data->port, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
 

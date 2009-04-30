@@ -6,6 +6,7 @@
          concat/2,
          getfield/3,
          getglobal/2,
+         gettop/1,
          pushboolean/2,
          pushinteger/2,
          pushstring/2,
@@ -17,7 +18,8 @@
          toboolean/2,
          tointeger/2,
          tolstring/2,
-         tonumber/2]).
+         tonumber/2,
+         type/2]).
 
 -include("lua.hrl").
 -include("lua_api.hrl").
@@ -44,6 +46,11 @@ getfield(L, Index, Name) ->
 getglobal(L, Name) ->
     command(L, {?ERL_LUA_GETGLOBAL, Name}),
     receive_simple_response().
+
+gettop(L) ->
+    command(L, {?ERL_LUA_GETTOP}),
+    receive_valued_response().
+    
 
 pushboolean(L, Bool) ->
     command(L, {?ERL_LUA_PUSHBOOLEAN, Bool}),
@@ -96,6 +103,10 @@ tonumber(L, Index) ->
     {ok, Value} = receive_valued_response(),
     Value2 = list_to_binary(Value),
     {ok, binary_to_term(Value2)}.
+
+type(L, Index) ->
+    command(L, {?ERL_LUA_TYPE, Index}),
+    receive_valued_response().
 
 
 command(#lua{port=Port}, Data) ->

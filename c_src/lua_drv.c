@@ -90,6 +90,9 @@ process(ErlDrvData handle, ErlIOVec *ev)
   case ERL_LUA_GETGLOBAL:
     erl_lua_getglobal(driver_data, buf, index);
     break;
+  case ERL_LUA_GETTOP:
+    erl_lua_gettop(driver_data, buf, index);
+    break;
   case ERL_LUA_PUSHBOOLEAN:
     erl_lua_pushboolean(driver_data, buf, index);
     break;
@@ -125,6 +128,9 @@ process(ErlDrvData handle, ErlIOVec *ev)
     break;
   case ERL_LUA_TONUMBER:
     erl_lua_tonumber(driver_data, buf, index);
+    break;
+  case ERL_LUA_TYPE:
+    erl_lua_type(driver_data, buf, index);
     break;
   
   case ERL_LUAL_DOSTRING:
