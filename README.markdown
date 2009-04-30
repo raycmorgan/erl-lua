@@ -27,7 +27,7 @@ There is also a simple way to run one off simple Lua code snippets:
     
 **NEW Higher Level API**
 
-*call* - Call a Lua function and return the values.
+*call* (lua\_state L, (atom|string) function\_name, list arguments, [int num\_returned]) - Call a Lua function and return the values.
 
     1> {ok, L} = lua:new_state().
     2> lua_erl:call(L, type, [23], 1).
